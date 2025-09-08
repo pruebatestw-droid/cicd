@@ -1,8 +1,8 @@
-name: CI/CD Vue3
+name: CI/CD Vue3 with pnpm
 
 on:
   push:
-    branches: [ main ] # se ejecuta al hacer push en main
+    branches: [ main ]
   pull_request:
     branches: [ main ]
 
@@ -20,18 +20,25 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'pnpm'
 
-      # 3. Instalar dependencias
+      # 3. Setup pnpm
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8 # o la que uses en tu proyecto
+
+      # 4. Instalar dependencias
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
-      # 4. Ejecutar build
+      # 5. Build
       - name: Build project
-        run: npm run build
+        run: pnpm build
 
-      # 5. (opcional) correr tests
+      # 6. (opcional) correr tests
       - name: Run tests
-        run: npm run test --if-present
+        run: pnpm test --if-present
 
   deploy:
     needs: build
@@ -46,14 +53,19 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          cache: 'pnpm'
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: 8
 
       - name: Install dependencies
-        run: npm ci
+        run: pnpm install --frozen-lockfile
 
       - name: Build project
-        run: npm run build
+        run: pnpm build
 
-      # 👉 Aquí el deploy a GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
