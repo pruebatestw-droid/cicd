@@ -3,12 +3,11 @@ name: CI/CD Vue3 with pnpm
 on:
   push:
     branches: [ main ]
-  pull_request:
-    branches: [ main ]
-
 
 permissions:
-  contents: write
+  contents: read      # Para leer el código
+  pages: write        # Para publicar en GitHub Pages
+  id-token: write     # Necesario para autenticación con Pages
 
 jobs:
   build:
@@ -33,44 +32,26 @@ jobs:
 
       # 4. Instalar dependencias
       - name: Install dependencies
-        run: pnpm install
+        run: pnpm install --frozen-lockfile
 
-      # 5. Build
+      # 5. Build del proyecto
       - name: Build project
         run: pnpm build
 
-      # 6. (opcional) correr tests
-      - name: Run tests
-        run: pnpm test --if-present
+      # 6. Subir build como artefacto para Pages
+      - name: Upload production-ready build
+        uses: actions/upload-pages-artifact@v2
+        with:
+          path: ./dist
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v3
-
-      - name: Setup Node.js
-        uses: actions/setup-node@v3
-        with:
-          node-version: 22
-
-      - name: Setup pnpm
-        uses: pnpm/action-setup@v2
-        with:
-          version: 10
-
-      - name: Install dependencies
-        run: pnpm install 
-
-      - name: Build project
-        run: pnpm build
-
-      # 👉 Deploy a GitHub Pages
       - name: Deploy to GitHub Pages
-        uses: peaceiris/actions-gh-pages@v3
-        with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          publish_dir: ./dist
+        id: deployment
+        uses: actions/deploy-pages@v2
