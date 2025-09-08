@@ -26,7 +26,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v2
         with:
-          version: 8 # o la que uses en tu proyecto
+          version: 8
 
       # 4. Instalar dependencias
       - name: Install dependencies
@@ -66,6 +66,7 @@ jobs:
       - name: Build project
         run: pnpm build
 
+      # 👉 Deploy a GitHub Pages
       - name: Deploy to GitHub Pages
         uses: peaceiris/actions-gh-pages@v3
         with:
